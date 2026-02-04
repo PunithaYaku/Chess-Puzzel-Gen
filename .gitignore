@@ -4,3 +4,5 @@ __pycache__/
 venv/
 env/
 .vscode/
+data/*
+!data/puzzles_subset.csv
