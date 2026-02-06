@@ -332,15 +332,75 @@
         let game = new Chess();
         let currentMate = 1;
 
+        const $status = $('#statusText');
+        const $fenDisplay = $('#fenDisplay');
+
         function onDragStart(source, piece, position, orientation) {
-            // Do not allow pieces to be moved for now (it's a viewer)
-            return false;
+            // Do not pick up pieces if the game is over
+            if (game.game_over()) return false;
+
+            // Only pick up pieces for the side to move
+            if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+                (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+                return false;
+            }
+        }
+
+        function onDrop(source, target) {
+            // See if the move is legal
+            const move = game.move({
+                from: source,
+                to: target,
+                promotion: 'q' // NOTE: Always promote to a queen for example simplicity
+            });
+
+            // Illegal move
+            if (move === null) return 'snapback';
+
+            updateStatus();
+        }
+
+        // Update the board position after the piece snap
+        // for castling, en passant, pawn promotion
+        function onSnapEnd() {
+            board.position(game.fen());
+        }
+
+        function updateStatus() {
+            let status = '';
+
+            let moveColor = 'White';
+            if (game.turn() === 'b') {
+                moveColor = 'Black';
+            }
+
+            // Checkmate?
+            if (game.in_checkmate()) {
+                status = 'Game over, ' + moveColor + ' is in checkmate.';
+            }
+            // Draw?
+            else if (game.in_draw()) {
+                status = 'Game over, drawn position';
+            }
+            // Game still on
+            else {
+                status = moveColor + ' to move';
+                // Check?
+                if (game.in_check()) {
+                    status += ', ' + moveColor + ' is in check';
+                }
+            }
+
+            $status.text(status);
+            $fenDisplay.text(game.fen());
         }
 
         const config = {
             draggable: true,
             position: 'start',
             onDragStart: onDragStart,
+            onDrop: onDrop,
+            onSnapEnd: onSnapEnd,
             pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
         };
 
@@ -358,20 +418,27 @@
         $('#generateBtn').on('click', async function () {
             const $btn = $(this);
             const $loader = $('#loader');
-            const $status = $('#statusText');
 
             $btn.prop('disabled', true);
             $loader.show();
-            $status.text('Thinking...');
+            $status.text('Generating puzzle...');
 
             try {
                 const response = await fetch(`/generate/${currentMate}`);
                 const data = await response.json();
 
                 if (response.ok) {
+                    game.load(data.fen);
                     board.position(data.fen);
-                    $('#fenDisplay').text(data.fen);
-                    $status.text('Success!');
+                    
+                    // Flip board based on turn
+                    if (game.turn() === 'b') {
+                        board.orientation('black');
+                    } else {
+                        board.orientation('white');
+                    }
+                    
+                    updateStatus();
                     console.log('Generated FEN:', data.fen);
                 } else {
                     $status.text('Error: ' + data.detail);
@@ -387,6 +454,7 @@
 
         // Initialize board
         $(window).resize(board.resize);
+        updateStatus();
     </script>
 </body>
 
