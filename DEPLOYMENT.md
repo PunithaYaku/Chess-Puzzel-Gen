@@ -53,5 +53,14 @@ If you have your own server (DigitalOcean, AWS, etc.):
 ---
 
 ## Important Notes
-- **Models**: Ensure `fen_generator.pth` and other model files are pushed to your repository or uploaded to the server, as the code expects them to exist.
-- **Resources**: Machine learning models can be memory-intensive. If the app crashes on deployment, check the logs for "Out of Memory" errors and increase the server's RAM.
+- **Models**: Ensure `fen_generator.pth` and other model files are pushed to your repository or uploaded to the server. These are the weights for the Transformer generator.
+- **Resources**: Machine learning models can be memory-intensive. For production, at least 2GB of RAM is highly recommended.
+- **Port Mapping**: The FastAPI app defaults to port 8000. Ensure your firewall allows traffic on this port or map it accordingly in Docker.
+
+## 🔒 Best Practices
+- **Security**: For public deployment, use a reverse proxy like Nginx with SSL (Let's Encrypt).
+- **Process Management**: In a non-Docker environment, use `gunicorn` with the `uvicorn` worker for better process management:
+  ```bash
+  pip install gunicorn
+  gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app
+  ```
