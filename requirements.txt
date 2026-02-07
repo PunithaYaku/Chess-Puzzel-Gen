@@ -1,5 +1,6 @@
-fastapi
-uvicorn
-torch
-python-chess
-numpy
+fastapi>=0.109.0
+uvicorn>=0.27.0
+torch --index-url https://download.pytorch.org/whl/cpu
+python-chess>=1.10.0
+numpy>=1.26.3
+pandas>=2.1.0
