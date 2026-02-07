@@ -1,19 +1,22 @@
 # Use an official lightweight Python image
-FROM python:3.10-slim
+FROM python:3.10-slim-bullseye
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies (e.g., for some python packages)
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements file first to leverage Docker cache
+# Install dependencies separately to leverage Docker cache
 COPY requirements.txt .
-
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .

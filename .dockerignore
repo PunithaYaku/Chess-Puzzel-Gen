@@ -1,0 +1,9 @@
+venv/
+.git/
+__pycache__/
+*.pyc
+Datasets/
+data/archive.zip
+*.pth
+.vscode/
+.env
