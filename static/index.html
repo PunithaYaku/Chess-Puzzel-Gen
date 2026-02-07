@@ -424,12 +424,10 @@
 
         const $status = $('#statusText');
         const $fenDisplay = $('#fenDisplay');
+        const $toast = $('#toast');
 
         function onDragStart(source, piece, position, orientation) {
-            // Do not pick up pieces if the game is over
             if (game.game_over()) return false;
-
-            // Only pick up pieces for the side to move
             if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
                 (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
                 return false;
@@ -437,48 +435,30 @@
         }
 
         function onDrop(source, target) {
-            // See if the move is legal
             const move = game.move({
                 from: source,
                 to: target,
-                promotion: 'q' // NOTE: Always promote to a queen for example simplicity
+                promotion: 'q'
             });
-
-            // Illegal move
             if (move === null) return 'snapback';
-
             updateStatus();
         }
 
-        // Update the board position after the piece snap
-        // for castling, en passant, pawn promotion
         function onSnapEnd() {
             board.position(game.fen());
         }
 
         function updateStatus() {
             let status = '';
+            let moveColor = game.turn() === 'b' ? 'Black' : 'White';
 
-            let moveColor = 'White';
-            if (game.turn() === 'b') {
-                moveColor = 'Black';
-            }
-
-            // Checkmate?
             if (game.in_checkmate()) {
-                status = 'Game over, ' + moveColor + ' is in checkmate.';
-            }
-            // Draw?
-            else if (game.in_draw()) {
+                status = `Victory! ${moveColor} is checkmated.`;
+            } else if (game.in_draw()) {
                 status = 'Game over, drawn position';
-            }
-            // Game still on
-            else {
-                status = moveColor + ' to move';
-                // Check?
-                if (game.in_check()) {
-                    status += ', ' + moveColor + ' is in check';
-                }
+            } else {
+                status = `${moveColor} to move`;
+                if (game.in_check()) status += ' (Check!)';
             }
 
             $status.text(status);
@@ -496,12 +476,27 @@
 
         board = ChessBoard('myBoard', config);
 
-        // Mate Selector Logic
+        // UI Event Handlers
         $('.mate-btn').on('click', function () {
             $('.mate-btn').removeClass('active');
             $(this).addClass('active');
             currentMate = $(this).data('mate');
             $('#currentMateDisplay').text(currentMate);
+        });
+
+        $('#flipBoard').on('click', () => board.flip());
+
+        $('#resetBoard').on('click', () => {
+            game.reset();
+            board.start();
+            updateStatus();
+        });
+
+        $('#copyFen').on('click', () => {
+            const fen = game.fen();
+            navigator.clipboard.writeText(fen).then(() => {
+                $toast.fadeIn().delay(2000).fadeOut();
+            });
         });
 
         // Generation Logic
@@ -511,7 +506,7 @@
 
             $btn.prop('disabled', true);
             $loader.show();
-            $status.text('Generating puzzle...');
+            $status.text('Dreaming of new puzzles...');
 
             try {
                 const response = await fetch(`/generate/${currentMate}`);
@@ -520,29 +515,19 @@
                 if (response.ok) {
                     game.load(data.fen);
                     board.position(data.fen);
-
-                    // Flip board based on turn
-                    if (game.turn() === 'b') {
-                        board.orientation('black');
-                    } else {
-                        board.orientation('white');
-                    }
-
+                    board.orientation(game.turn() === 'b' ? 'black' : 'white');
                     updateStatus();
-                    console.log('Generated FEN:', data.fen);
                 } else {
-                    $status.text('Error: ' + data.detail);
+                    $status.text('Engine Error: ' + data.detail);
                 }
             } catch (error) {
-                console.error('Error generating puzzle:', error);
-                $status.text('Connection failed');
+                $status.text('Neural Link Failed');
             } finally {
                 $btn.prop('disabled', false);
                 $loader.hide();
             }
         });
 
-        // Initialize board
         $(window).resize(board.resize);
         updateStatus();
     </script>
