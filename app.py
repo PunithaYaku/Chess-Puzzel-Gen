@@ -1,3 +1,4 @@
+import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
@@ -8,6 +9,17 @@ import os
 from train_gen import CausalTransformer, FENCharset, VOCAB_SIZE
 import torch.nn.functional as F
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("app.log")
+    ]
+)
+logger = logging.getLogger("chess-ai")
+
 app = FastAPI(title="AI Chess Puzzle Generator API")
 
 # Global model and charset initialization
@@ -17,7 +29,11 @@ model = CausalTransformer(VOCAB_SIZE).to(device)
 
 # Load pre-trained weights if available
 if os.path.exists("fen_generator.pth"):
+    logger.info("Loading pre-trained model weights...")
     model.load_state_dict(torch.load("fen_generator.pth", map_location=device))
+else:
+    logger.warning("fen_generator.pth not found. Model will start with random weights.")
+
 model.eval()
 
 def sample_with_temperature(logits, temperature=1.0, top_k=10):
@@ -89,6 +105,7 @@ async def generate_puzzle_api(mate_in: int):
     Generates a new chess puzzle with a target 'mate in N' difficulty.
     Retries up to 20 times to produce a valid chess board.
     """
+    logger.info(f"Puzze generation requested: Mate in {mate_in}")
     max_retries = 20
     for attempt in range(max_retries):
         input_str = f"[{mate_in}]:"
@@ -111,7 +128,8 @@ async def generate_puzzle_api(mate_in: int):
         full_output = charset.decode(input_ids)
         try:
             parts = full_output.split("]:")
-            if len(parts) < 2: continue
+            if len(parts) < 2: 
+                continue
             
             raw_fen = parts[1].split(" ")[0].strip()
             repaired_fen = repair_fen(raw_fen)
@@ -119,16 +137,18 @@ async def generate_puzzle_api(mate_in: int):
             # Use python-chess to validate the FEN
             board = chess.Board(repaired_fen)
             
+            logger.info(f"Successfully generated puzzle on attempt {attempt + 1}")
             return {
                 "fen": repaired_fen,
                 "mate_in": mate_in,
                 "attempt": attempt + 1
             }
-        except Exception:
-            # Continue to next retry on validation error
+        except Exception as e:
+            logger.debug(f"Attempt {attempt + 1} failed validation: {str(e)}")
             continue
     
-    raise HTTPException(status_code=500, detail="Failed to generate valid FEN after multiple attempts")
+    logger.error(f"Failed to generate valid FEN for Mate in {mate_in} after {max_retries} attempts")
+    raise HTTPException(status_code=500, detail=f"Neural network failed to produce a valid board for Mate in {mate_in} after {max_retries} attempts. Please try again.")
 
 # Serve static frontend files
 if not os.path.exists("static"):
@@ -139,5 +159,6 @@ app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    # Start the development server
+    logger.info("Starting AI Chess Puzzle Generator API server...")
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
