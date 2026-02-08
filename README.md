@@ -50,3 +50,17 @@ Build and run the generator using Docker:
 docker build -t chess-puzzle-gen .
 docker run -p 8000:8000 chess-puzzle-gen
 ```
+
+## 🛠️ Troubleshooting
+
+- **Model Weights Missing**: If `fen_generator.pth` is missing, the API will still run but may generate nonsensical FEN strings. Ensure you run `train_gen.py` first.
+- **Port Conflicts**: Ensure port 8000 is not being used by another application.
+- **Memory Issues**: The model runs on CPU by default. If you encounter crashes, ensure your system has at least 4GB of free RAM.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started, our branching policy, and code style.
+
+## 📜 License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
