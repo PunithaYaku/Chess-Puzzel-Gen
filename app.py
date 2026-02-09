@@ -99,13 +99,18 @@ def repair_fen(fen):
     ep = parts[3] if len(parts) > 3 else '-'
     return f"{new_pos} {turn} {castling} {ep} 0 1"
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring."""
+    return {"status": "ok", "model_loaded": os.path.exists("fen_generator.pth")}
+
 @app.get("/generate/{mate_in}")
 async def generate_puzzle_api(mate_in: int):
     """
     Generates a new chess puzzle with a target 'mate in N' difficulty.
     Retries up to 20 times to produce a valid chess board.
     """
-    logger.info(f"Puzze generation requested: Mate in {mate_in}")
+    logger.info(f"Puzzle generation requested: Mate in {mate_in}")
     max_retries = 20
     for attempt in range(max_retries):
         input_str = f"[{mate_in}]:"

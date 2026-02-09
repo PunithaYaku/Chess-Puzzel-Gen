@@ -529,6 +529,15 @@
         });
 
         $(window).resize(board.resize);
+
+        // Keyboard Shortcuts
+        $(window).on('keydown', (e) => {
+            if (e.code === 'Space' && !$('#generateBtn').prop('disabled')) {
+                e.preventDefault();
+                $('#generateBtn').trigger('click');
+            }
+        });
+
         updateStatus();
     </script>
 </body>

@@ -2,7 +2,13 @@ import os
 from datasets import load_dataset
 import pandas as pd
 
-def download_data():
+def download_data() -> None:
+    """
+    Downloads Lichess puzzle dataset from Hugging Face, caches it locally,
+    and filters for specific mating themes (Mate in 1-5).
+    
+    The filtered subsets are saved in the 'data/' directory as CSV files.
+    """
     print("Loading Lichess puzzles dataset from Hugging Face...")
     try:
         # Check if local file exists to avoid re-downloading huge dataset

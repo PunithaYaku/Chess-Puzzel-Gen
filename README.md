@@ -16,6 +16,16 @@ A generative AI system that creates **completely new** chess puzzles (Mate in 1 
 - `train.py` / `main.py`: Baseline model for move prediction (evaluation).
 - `static/`: Web frontend for interacting with the generator.
 
+## 🧠 Technical Architecture
+
+The system uses a **Causal Transformer** architecture specifically adapted for chess notation.
+
+1.  **Tokenization**: FEN strings are broken down into a vocabulary of 50+ characters (pieces, numbers, separators).
+2.  **Context**: The model prepends a prompt like `[3]:` to signify a request for a "Mate in 3" puzzle.
+3.  **Generation**: The transformer predicts the next character in the FEN sequence auto-regressively.
+4.  **Post-Processing**: A robust repair algorithm ensures the generated string follows legal FEN structural rules (8x8 grid).
+5.  **Validation**: `python-chess` validates the final board state before serving it to the user.
+
 ## 🛠️ Setup & Installation
 
 1. **Clone the repository**:
