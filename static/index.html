@@ -441,7 +441,7 @@
         let game = new Chess();
         let currentMate = 1;
         let currentSolution = [];
-        let hintIndex = 0;
+        let solutionIndex = 0;
 
         const $status = $('#statusText');
         const $fenDisplay = $('#fenDisplay');
@@ -452,20 +452,84 @@
 
         function onDragStart(source, piece, position, orientation) {
             if (game.game_over()) return false;
+
+            // Only allow moves for the active side
             if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
                 (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+                return false;
+            }
+
+            // Don't allow moves if it's the computer's turn in the solution
+            if (currentSolution.length > 0 && solutionIndex % 2 !== 0) {
                 return false;
             }
         }
 
         function onDrop(source, target) {
-            const move = game.move({
+            // Preliminary move to check legality
+            const moveData = {
                 from: source,
                 to: target,
                 promotion: 'q'
-            });
+            };
+
+            // If no puzzle is active, just allow free play
+            if (currentSolution.length === 0) {
+                const move = game.move(moveData);
+                if (move === null) return 'snapback';
+                updateStatus();
+                return;
+            }
+
+            // Validate against solution
+            const expectedMoveUci = currentSolution[solutionIndex];
+            const moveUci = source + target;
+            const moveUciWithPromo = source + target + 'q';
+
+            if (moveUci !== expectedMoveUci && moveUciWithPromo !== expectedMoveUci) {
+                // Incorrect move
+                $status.text('❌ Incorrect! Try a different move.');
+                $status.css('color', '#ef4444');
+                setTimeout(() => {
+                    $status.css('color', '');
+                    updateStatus();
+                }, 1500);
+                return 'snapback';
+            }
+
+            // Move is correct
+            const move = game.move(moveData);
             if (move === null) return 'snapback';
+
+            solutionIndex++;
             updateStatus();
+            $status.text('✅ Correct Move!');
+            $status.css('color', '#10b981');
+
+            if (solutionIndex < currentSolution.length) {
+                // Trigger opponent's response
+                setTimeout(makeOpponentMove, 600);
+            } else {
+                $status.text('🏆 Puzzle Solved!');
+                $status.css('color', '#f59e0b');
+            }
+        }
+
+        function makeOpponentMove() {
+            if (solutionIndex >= currentSolution.length) return;
+
+            const moveUci = currentSolution[solutionIndex];
+            const move = game.move(moveUci, { sloppy: true });
+            if (move) {
+                board.position(game.fen());
+                solutionIndex++;
+                updateStatus();
+
+                if (solutionIndex === currentSolution.length) {
+                    $status.text('🏆 Puzzle Solved!');
+                    $status.css('color', '#f59e0b');
+                }
+            }
         }
 
         function onSnapEnd() {
@@ -477,7 +541,7 @@
             let moveColor = game.turn() === 'b' ? 'Black' : 'White';
 
             if (game.in_checkmate()) {
-                status = `Victory! ${moveColor} is checkmated.`;
+                status = `Checkmate! ${moveColor === 'White' ? 'Black' : 'White'} wins.`;
             } else if (game.in_draw()) {
                 status = 'Game over, drawn position';
             } else {
@@ -515,6 +579,8 @@
             board.start();
             $solveActions.hide();
             $solutionDisplay.hide();
+            currentSolution = [];
+            solutionIndex = 0;
             updateStatus();
         });
 
@@ -525,39 +591,44 @@
             });
         });
 
-        // Hint Logic
+        // Hint Logic - Makes the correct move for the user
         $('#hintBtn').on('click', () => {
-            if (currentSolution && hintIndex < currentSolution.length) {
-                const moveUci = currentSolution[hintIndex];
+            if (currentSolution.length > 0 && solutionIndex < currentSolution.length) {
+                const moveUci = currentSolution[solutionIndex];
                 const move = game.move(moveUci, { sloppy: true });
                 if (move) {
                     board.position(game.fen());
-                    hintIndex++;
+                    solutionIndex++;
                     updateStatus();
+                    $status.text('Hint used: Move applied.');
+
+                    if (solutionIndex < currentSolution.length) {
+                        setTimeout(makeOpponentMove, 600);
+                    } else {
+                        $status.text('🏆 Puzzle Solved!');
+                    }
                 }
-            } else {
-                $status.text('No more hints available!');
             }
         });
 
-        // Reveal Logic
         $('#revealBtn').on('click', () => {
             $solutionMoves.text(currentSolution.join(' → '));
             $solutionDisplay.fadeIn();
         });
 
         // Generation Logic
-        $('#generateBtn').on('click', async function () {
-            const $btn = $(this);
+        const generatePuzzle = async () => {
+            const $btn = $('#generateBtn');
             const $loader = $('#loader');
 
             $btn.prop('disabled', true);
             $loader.show();
-            $status.text('Dreaming of new puzzles...');
+            $status.text('Generating AI Puzzle...');
+            $status.css('color', '');
             $solveActions.hide();
             $solutionDisplay.hide();
             currentSolution = [];
-            hintIndex = 0;
+            solutionIndex = 0;
 
             try {
                 const response = await fetch(`/generate/${currentMate}`);
@@ -571,15 +642,17 @@
                     $solveActions.css('display', 'flex');
                     updateStatus();
                 } else {
-                    $status.text('Engine Error: ' + data.detail);
+                    $status.text('Error: ' + data.detail);
                 }
             } catch (error) {
-                $status.text('Neural Link Failed');
+                $status.text('Connection Failed');
             } finally {
                 $btn.prop('disabled', false);
                 $loader.hide();
             }
-        });
+        };
+
+        $('#generateBtn').on('click', generatePuzzle);
 
         $(window).resize(board.resize);
 
@@ -589,6 +662,11 @@
                 e.preventDefault();
                 $('#generateBtn').trigger('click');
             }
+        });
+
+        // Auto-generate puzzle on page load
+        $(document).ready(() => {
+            setTimeout(generatePuzzle, 500);
         });
 
         updateStatus();

@@ -7,3 +7,4 @@ env/
 data/*
 !data/puzzles_subset.csv
 Datasets/
+*.log
