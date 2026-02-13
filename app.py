@@ -23,16 +23,21 @@ logger = logging.getLogger("chess-ai")
 app = FastAPI(title="AI Chess Puzzle Generator API")
 
 # Global model and charset initialization
-device = torch.device("cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 charset = FENCharset()
 model = CausalTransformer(VOCAB_SIZE).to(device)
 
+# Log model info
+param_count = sum(p.numel() for p in model.parameters() if p.requires_grad)
+logger.info(f"Using device: {device}")
+logger.info(f"Initialized model with {param_count:,} trainable parameters")
+
 # Load pre-trained weights if available
 if os.path.exists("fen_generator.pth"):
-    logger.info("Loading pre-trained model weights...")
+    logger.info("Loading pre-trained model weights from 'fen_generator.pth'...")
     model.load_state_dict(torch.load("fen_generator.pth", map_location=device))
 else:
-    logger.warning("fen_generator.pth not found. Model will start with random weights.")
+    logger.warning("fen_generator.pth not found. Model will start with random weights (please run train_gen.py first).")
 
 model.eval()
 
