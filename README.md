@@ -63,6 +63,15 @@ docker run -p 8000:8000 chess-puzzle-gen
 
 ## 🛠️ Troubleshooting
 
+- **PowerShell Script Execution**: If you get a "running scripts is disabled" error on Windows, run:
+  ```powershell
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+  ```
+- **SRE Module Mismatch**: If you see `AssertionError: SRE module mismatch`, it's likely due to conflicting `PYTHONPATH` or `PYTHONHOME` environment variables. Clear them before running:
+  ```powershell
+  $env:PYTHONPATH = ""
+  $env:PYTHONHOME = ""
+  ```
 - **Model Weights Missing**: If `fen_generator.pth` is missing, the API will still run but may generate nonsensical FEN strings. Ensure you run `train_gen.py` first.
 - **Port Conflicts**: Ensure port 8000 is not being used by another application.
 - **Memory Issues**: The model runs on CPU by default. If you encounter crashes, ensure your system has at least 4GB of free RAM.
