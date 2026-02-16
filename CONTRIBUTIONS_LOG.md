@@ -4,6 +4,8 @@
 - Contribution 2: documenting progress
 - Contribution 3: updating project status
 - Contribution 4: maintenance and updates
+- Contribution 5: refining documentation
+
 
 
 
