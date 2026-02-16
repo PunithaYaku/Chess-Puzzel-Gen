@@ -8,6 +8,8 @@
 - Contribution 6: minor tweaks
 - Contribution 7: project cleanup
 - Contribution 8: metadata update
+- Contribution 9: documentation consistency
+
 
 
 
