@@ -6,6 +6,8 @@
 - Contribution 4: maintenance and updates
 - Contribution 5: refining documentation
 - Contribution 6: minor tweaks
+- Contribution 7: project cleanup
+
 
 
 
