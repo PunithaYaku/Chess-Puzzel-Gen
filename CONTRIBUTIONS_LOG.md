@@ -10,6 +10,8 @@
 - Contribution 8: metadata update
 - Contribution 9: documentation consistency
 - Contribution 10: final touches
+- Contribution 11: completing contribution goal
+
 
 
 
