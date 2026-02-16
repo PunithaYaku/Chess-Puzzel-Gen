@@ -9,6 +9,8 @@
 - Contribution 7: project cleanup
 - Contribution 8: metadata update
 - Contribution 9: documentation consistency
+- Contribution 10: final touches
+
 
 
 
