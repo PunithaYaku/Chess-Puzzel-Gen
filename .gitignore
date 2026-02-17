@@ -8,3 +8,13 @@ data/*
 !data/puzzles_subset.csv
 Datasets/
 *.log
+
+# IDEs
+.idea/
+*.swp
+*.swo
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
