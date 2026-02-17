@@ -16,6 +16,8 @@
 - Contribution 13: Added MIT license file
 - Contribution 14: Improved docstrings in app.py
 - Contribution 15: Documentation update for app server integration
+- Contribution 16: Expanded .gitignore for better development environment hygiene
+- Contribution 17: Project workflow refinement
 
 
 
