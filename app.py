@@ -1,3 +1,9 @@
+"""
+AI Chess Puzzle Generator - FastAPI Web Server
+This module serves a REST API for generating novel chess puzzles.
+Built with FastAPI, PyTorch, and python-chess.
+"""
+
 import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
