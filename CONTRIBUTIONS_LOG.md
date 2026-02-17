@@ -13,6 +13,8 @@
 - Contribution 11: completing contribution goal
 
 - Contribution 12: Starting today's progress (2026-02-17)
+- Contribution 13: Added MIT license file
+
 
 
 
