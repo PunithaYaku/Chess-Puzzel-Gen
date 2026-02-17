@@ -26,6 +26,20 @@ The system uses a **Causal Transformer** architecture specifically adapted for c
 4.  **Post-Processing**: A robust repair algorithm ensures the generated string follows legal FEN structural rules (8x8 grid).
 5.  **Validation**: `python-chess` validates the final board state before serving it to the user.
 
+## ⚡ Quick Start
+
+```bash
+# Clone and install
+git clone https://github.com/PunithaYaku/Chess-Puzzel-Gen.git
+cd Chess-Puzzel-Gen
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+
+# Run the GUI
+.\run_gui.bat
+```
+
 ## 🛠️ Setup & Installation
 
 1. **Clone the repository**:
