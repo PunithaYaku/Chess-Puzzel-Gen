@@ -9,6 +9,7 @@ def download_data() -> None:
     
     The filtered subsets are saved in the 'data/' directory as CSV files.
     """
+    os.makedirs("data", exist_ok=True)
     print("Loading Lichess puzzles dataset from Hugging Face...")
     try:
         # Check if local file exists to avoid re-downloading huge dataset
