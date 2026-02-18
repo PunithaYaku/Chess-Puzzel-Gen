@@ -86,20 +86,27 @@ def generate(n=1, max_retries=50):
         full_output = charset.decode(input_ids)
         try:
             parts = full_output.split("]:")
-            if len(parts) < 2: continue
+            if len(parts) < 2: 
+                continue
             
             raw_fen = parts[1].split(" ")[0].strip()
             # Try to repair before validating
             repaired_fen = repair_fen(raw_fen)
-            if not repaired_fen: continue
             
             board = chess.Board(repaired_fen)
-            print(f"\n[Success] Attempt {attempt+1}")
-            print(f"Generated Raw: {raw_fen}")
-            print(f"Repaired FEN: {repaired_fen}")
-            print(board)
-            return repaired_fen
-        except:
+            if board.is_valid():
+                print(f"\n[Success] Attempt {attempt+1}")
+                print(f"Generated Raw: {raw_fen}")
+                print(f"Repaired FEN: {repaired_fen}")
+                print(board)
+                return repaired_fen
+            else:
+                print(f"[Info] Attempt {attempt+1} produced invalid board: {board.status()}")
+        except ValueError as e:
+            # This happens if chess.Board() fails even after repair
+            continue
+        except Exception as e:
+            print(f"[Error] Unexpected error in generation: {e}")
             continue
     
     print(f"Failed to generate a valid FEN for Mate in {n} after {max_retries} attempts.")
