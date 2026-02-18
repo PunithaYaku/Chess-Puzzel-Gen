@@ -22,7 +22,8 @@ Thank you for your interest in contributing to the AI Chess Architect! We welcom
 
 ### Branching Policy
 -   Create a feature branch for any new work: `git checkout -b feature/your-feature-name`.
--   Keep your commits small and focused. Each commit should have a clear, descriptive message.
+-   Keep your commits small and focused. Each commit should have a clear, descriptive message (e.g., `feat: ...`, `fix: ...`, `docs: ...`).
+-   We encourage using a `CONTRIBUTIONS_LOG.md` to track your daily progress and goals.
 
 ### Testing
 -   Before submitting a Pull Request, please ensure your changes do not break existing functionality.
