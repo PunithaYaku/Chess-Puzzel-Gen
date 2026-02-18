@@ -59,3 +59,14 @@ def test_charset_encoding():
     encoded = charset.encode(original)
     decoded = charset.decode(encoded)
     assert original == decoded
+def test_repair_fen_extra_spaces():
+    # FEN with extra spaces between parts
+    raw_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR   w   KQkq   -   0   1"
+    repaired = repair_fen(raw_fen)
+    assert "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" == repaired
+
+def test_repair_fen_empty():
+    # Empty string should at least return a valid board structure
+    raw_fen = ""
+    repaired = repair_fen(raw_fen)
+    assert chess.Board(repaired).is_valid()
