@@ -40,6 +40,8 @@ Thank you for your interest in contributing to the AI Chess Architect! We welcom
 2.  Push your changes to your fork.
 3.  Submit a Pull Request to the `main` repository.
 4.  Provide a clear description of the changes and why they are necessary.
+5.  Ensure all tests pass by running `pytest`.
+6.  Update documentation if you've added new features or changed APIs.
 
 ## Community and Feedback
 If you find a bug or have a suggestion, please open an issue on the GitHub repository. We appreciate your feedback!
