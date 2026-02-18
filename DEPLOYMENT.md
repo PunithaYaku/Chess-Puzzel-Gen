@@ -57,6 +57,13 @@ If you have your own server (DigitalOcean, AWS, etc.):
 - **Resources**: Machine learning models can be memory-intensive. For production, at least 2GB of RAM is highly recommended.
 - **Port Mapping**: The FastAPI app defaults to port 8000. Ensure your firewall allows traffic on this port or map it accordingly in Docker.
 
+## 🗺️ Roadmap
+- [ ] **Phase 1**: Optimize Transformer model for faster FEN generation.
+- [ ] **Phase 2**: Add more "Mate in N" datasets (Mate in 4, 5).
+- [ ] **Phase 3**: Implement a more interactive GUI with move suggestions.
+- [ ] **Phase 4**: Add user accounts and puzzle history tracking.
+- [ ] **Phase 5**: Mobile-friendly web interface optimization.
+
 ## 🔒 Best Practices
 - **Security**: For public deployment, use a reverse proxy like Nginx with SSL (Let's Encrypt).
 - **Process Management**: In a non-Docker environment, use `gunicorn` with the `uvicorn` worker for better process management:
