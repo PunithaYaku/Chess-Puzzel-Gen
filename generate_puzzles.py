@@ -64,8 +64,15 @@ def repair_fen(fen):
 def generate(n=1, max_retries=50):
     charset = FENCharset()
     model = CausalTransformer(VOCAB_SIZE)
-    if torch.os.path.exists("fen_generator.pth"):
-        model.load_state_dict(torch.load("fen_generator.pth"))
+    model_path = "fen_generator.pth"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    
+    if torch.os.path.exists(model_path):
+        model.load_state_dict(torch.load(model_path, map_location=device))
+        print(f"[Model] Loaded generator weights from {model_path} on {device}")
+    else:
+        print(f"[Warning] No generator weights found at {model_path}. Using uninitialized model.")
     model.eval()
 
     for attempt in range(max_retries):
@@ -74,7 +81,7 @@ def generate(n=1, max_retries=50):
         
         with torch.no_grad():
             for _ in range(120): 
-                x = torch.tensor([input_ids])
+                x = torch.tensor([input_ids]).to(device)
                 logits = model(x)
                 last_logit = logits[0, -1, :]
                 
